@@ -12,8 +12,8 @@ impl SomeOtherClass for SomeOtherClassImpl {}
 
 impl Il2CppObject for SomeOtherClassImpl {
     const klass: Il2CppClass = Il2CppClass {
-        namespace: String::from_str("").unwrap(),
-        name: String::from_str("SomeOtherClass").unwrap(),
+        namespace: "",
+        name: "SomeOtherClassImpl",
     };
 }
 

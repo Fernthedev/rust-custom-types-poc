@@ -4,8 +4,8 @@ pub use proc_macros::custom_type_class;
 
 pub mod custom_types {
     pub struct Il2CppClass {
-        pub namespace: String,
-        pub name: String,
+        pub namespace: &'static str,
+        pub name: &'static str,
     }
 
     pub trait Il2CppObject {

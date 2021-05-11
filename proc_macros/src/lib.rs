@@ -1,8 +1,10 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
-use quote::{format_ident, quote};
-use syn::{parse_macro_input, Error, LitStr, Pat, Token};
+use proc_macro2::{Ident, Span};
+use quote::{format_ident, quote, ToTokens};
+
+use syn::{parse_macro_input, Error, LitStr, Token};
 use syn::{punctuated::Punctuated, ItemStruct};
 
 #[proc_macro_attribute]
@@ -27,7 +29,7 @@ fn impl_custom_type_class(
     // TODO: Class is redundant, should we use it or use the struct name?
     // TODO: Get the namespace from the mod of the struct?
     // TODO: Make override_class an actual type instead of a string so compiler can see if it exists. Possibly support strings in case of a stripped class?
-    let (namespace, class, override_class) = match args.as_slice() {
+    let (mut namespace, class, override_class) = match args.as_slice() {
         [n, c, o] => (n, c, o),
         _ => {
             let msg = format!("Expected 3 arguments, found {}", args.len());
@@ -35,30 +37,34 @@ fn impl_custom_type_class(
         }
     };
 
-    let override_class_ident = override_class.parse::<::proc_macro::TokenStream>().unwrap();
+    let override_class_ident = syn::Ident::new(override_class, Span::call_site());
+
+    let input_clone = input.clone();
 
     let name = input.ident;
 
     let gen = quote! {
+        #input_clone
+
         impl CustomTypeClassTrait for #name {
             fn install() {
-                println!("Installing custom type {}::{}!", stringify!(#namespace), stringify!(#name));
+                println!("Installing custom type {}::{}!", #namespace, stringify!(#name));
                 // TODO: Install
             }
         }
 
         impl Il2CppObject for #name {
             const klass: Il2CppClass = Il2CppClass {
-                namespace: String::from_str(!stringify(#namespace)).unwrap(),
-                name: String::from_str(!stringify(#name)).unwrap(),
+                namespace: #namespace,
+                name: stringify!(#name),
             };
         }
+
 
         // How to make only if override_class is specified?
         impl #override_class_ident for #name {
 
         }
-
     };
     Ok(gen.into())
 }
