@@ -2,7 +2,7 @@ extern crate proc_macro;
 
 use proc_macro::TokenStream;
 use proc_macro2::Span;
-use quote::quote;
+use quote::{format_ident, quote};
 
 use syn::{parse_macro_input, Error, LitStr, Token};
 use syn::{punctuated::Punctuated, ItemStruct};
@@ -38,11 +38,21 @@ fn impl_custom_type_class(
     };
 
     let override_class_ident = syn::Ident::new(override_class, Span::call_site());
+    let override_class_impl_ident = format_ident!("{}Impl", override_class_ident);
 
     let name = &input.ident;
 
+    let trait_name = format_ident!("{}Trait", name);
+
     let gen = quote! {
         #input
+
+        // Somehow generate a trait with methods and force it to be implemented?
+        // Maybe not, not sure
+        trait #trait_name {
+            // Replace with Into?
+            fn get_custom_klass() -> Il2CppClass;
+        }
 
         impl CustomTypeClassTrait for #name {
             fn install() {
@@ -51,17 +61,19 @@ fn impl_custom_type_class(
             }
         }
 
-        impl Il2CppObject for #name {
-            const KLASS: Il2CppClass = Il2CppClass {
-                namespace: #namespace,
-                name: stringify!(#name),
-            };
+        // Allow down casting from Il2CppObject
+        impl From<Il2CppObject> for #name {
+            fn from(il2CppObject: Il2CppObject) -> Self {
+                todo!();
+            }
         }
 
 
         // How to make only if override_class is specified?
-        impl #override_class_ident for #name {
-
+        impl From<#override_class_impl_ident> for #name {
+            fn from(base: #override_class_impl_ident) -> Self {
+                todo!();
+            }
         }
     };
     Ok(gen.into())
