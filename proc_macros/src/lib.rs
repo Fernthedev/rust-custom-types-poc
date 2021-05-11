@@ -1,8 +1,8 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
-use proc_macro2::{Ident, Span};
-use quote::{format_ident, quote, ToTokens};
+use proc_macro2::Span;
+use quote::quote;
 
 use syn::{parse_macro_input, Error, LitStr, Token};
 use syn::{punctuated::Punctuated, ItemStruct};
@@ -29,7 +29,7 @@ fn impl_custom_type_class(
     // TODO: Class is redundant, should we use it or use the struct name?
     // TODO: Get the namespace from the mod of the struct?
     // TODO: Make override_class an actual type instead of a string so compiler can see if it exists. Possibly support strings in case of a stripped class?
-    let (mut namespace, class, override_class) = match args.as_slice() {
+    let (namespace, _class, override_class) = match args.as_slice() {
         [n, c, o] => (n, c, o),
         _ => {
             let msg = format!("Expected 3 arguments, found {}", args.len());
@@ -39,12 +39,10 @@ fn impl_custom_type_class(
 
     let override_class_ident = syn::Ident::new(override_class, Span::call_site());
 
-    let input_clone = input.clone();
-
-    let name = input.ident;
+    let name = &input.ident;
 
     let gen = quote! {
-        #input_clone
+        #input
 
         impl CustomTypeClassTrait for #name {
             fn install() {
@@ -54,7 +52,7 @@ fn impl_custom_type_class(
         }
 
         impl Il2CppObject for #name {
-            const klass: Il2CppClass = Il2CppClass {
+            const KLASS: Il2CppClass = Il2CppClass {
                 namespace: #namespace,
                 name: stringify!(#name),
             };

@@ -9,7 +9,7 @@ pub mod custom_types {
     }
 
     pub trait Il2CppObject {
-        const klass: Il2CppClass;
+        const KLASS: Il2CppClass;
     }
 
     // Example implementation of codegen

@@ -1,12 +1,11 @@
 mod test {
-    use std::str::FromStr;
     use crate::custom_types::*;
     use proc_macros::custom_type_class;
     trait SomeOtherClass {}
     struct SomeOtherClassImpl {}
     impl SomeOtherClass for SomeOtherClassImpl {}
     impl Il2CppObject for SomeOtherClassImpl {
-        const klass: Il2CppClass = Il2CppClass {
+        const KLASS: Il2CppClass = Il2CppClass {
             namespace: "",
             name: "SomeOtherClassImpl",
         };
@@ -28,7 +27,7 @@ mod test {
         }
     }
     impl Il2CppObject for CustomTypeA {
-        const klass: Il2CppClass = Il2CppClass {
+        const KLASS: Il2CppClass = Il2CppClass {
             namespace: "",
             name: "CustomTypeA",
         };
